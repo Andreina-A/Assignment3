@@ -1,0 +1,162 @@
+---
+title: "Assignment 3 Data 607"
+author: "Andreina A"
+date: "2024-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading packages
+Loading packages needed for this assignment.
+```{r}
+library(tidyverse)
+library(openintro)
+library(dplyr)
+library(knitr)
+```
+
+## Normalization
+
+1.Provide an example of at least three dataframes in R that demonstrate normalization. The dataframes can contain any data, either real or synthetic. Although normalization is typically done in SQL and relational databases, you are expected to show this example in R, as it is our main work environment in this course.
+
+***Below I will show three data frames that are normalized***
+
+*Data frame 1- in this data frame called my cousins' height, you will find the names of my cousin and their age along with their height. Since height and age can change over time and can be a repeated values, separate keys were created for these values.*
+**Data not normalized**
+```{r}
+my_cousins_heights<-data.frame(person_ID_PK=c(1,2,3,4), name=c('Elvin', 'Nina', 'Nathan', 'William'), height_feet=c(5.8, 5.4, 4.8, 5.7), age= c(38,30,7,40))
+my_cousins_heights
+```
+**Normalized Data**
+
+```{r }
+Person_name<-subset(my_cousins_heights, select = c(person_ID_PK, name))
+Person_name
+
+
+Cousin_age<-data.frame(Age_ID=1:4,age= c(38,30,4,40))
+Cousin_age                       
+
+Height_info <-data.frame(heightID=c('h1','h2','h3','h4'), height_feet=c(5.8, 5.4, 4.8, 5.7))
+Height_info
+
+Height_data<-data.frame(Age_ID=1:4,person_ID_PK=c(1,2,3,4), heightID=c('h1','h2','h3','h4'))
+Height_data
+```
+
+*Data frame 2- is normalized data frame for my emergency contacts, where you will some see some of my contacts have multiple numbers of contact and in order to normalize the data a new column was made. For those in my emergency contact that didn't have a second phone number will have an "NA" as a value. To avoid the second column for phone number 2, separate keys were made for the phone numbers group in 1 and 2.*
+
+**Data not normalized**  
+```{R}
+my_emergency_contacts<-data.frame(contact_ID_PK=1:3, contacts=c('Jenny', 'Nanie', 'Elvin'), phone_number1=c('555-555-5555', '789-788-9999', '347-000-4545'), phone_number2=c('646-555-5555', NA, NA))
+my_emergency_contacts
+```
+**Normalized data**
+
+```{r }
+Contact_name<-subset(my_emergency_contacts, select = c(contact_ID_PK, contacts))
+Contact_name
+
+phone_numbers<-c('555-555-5555','646-555-5555', '789-788-9999','347-000-4545')
+
+Contact_info<-data.frame(info_ID=1:4,contact_ID_PK=c(1,1,2,3),phone_numbers, Phone_ID=c('1','2','1','1'))
+Contact_info
+
+Phone_ID<-data.frame(phone_ID=1:2, phone_type=c('phone_number1','phone_number2'))
+Phone_ID
+
+```
+
+
+
+
+*Data frame 3- A CVS receipt where I brought 5 items, two pair of items had the same price in this case a key was made as well for the item type and for the items themselves. The keys were create for each of these columns because their values could be repeated.*
+
+**Data not normalized**
+```{r}
+my_CVS_receipt<-data.frame(Receipt_K=1:5, items=c('M&Ms', 'Motts apple juice', 'M&Ms', 'Dove shampoo', 'Dove soap'), item_price=c('2.50', '3.50', '2.50','5.00','5.00'), item_type=c('food', 'drink','food','hair care', 'body care'))
+my_CVS_receipt
+```
+**Data normalized**
+
+```{r }
+items_info<-data.frame(items.keys=c('i1', 'i2','i3','i4'), items=c('M&Ms', 'Motts apple juice', 'Dove shampoo', 'Dove soap'))
+items_info
+
+items_type<-data.frame(items.keys=c('t1', 't2','t3','t4'), item_type=c('food', 'drink','hair care', 'body care'))
+items_type
+
+items_price<-data.frame(items.keys=c('p1', 'p2','p3'), item_price=c('2.50', '3.50','5.00'))
+items_price
+
+receipt_data<-select(my_CVS_receipt, Receipt_K, items, item_price, item_type)
+
+receipt_data2<-receipt_data %>%
+  dplyr::mutate(items=c('i1','i2','i1','i3','i4'),item_price=c('p1', 'p2','p1','p3','p3'), item_type=c('t1', 't2','t1','t3','t4'))
+receipt_data2
+```
+
+
+
+***Character Manipulation***
+
+2. Using the 173 majors listed in fivethirtyeight.com’s College Majors dataset [https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/], provide code that identifies the majors that contain either "DATA" or "STATISTICS"
+
+Article:https://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/
+
+Data frame:https://github.com/fivethirtyeight/data/blob/master/college-majors/majors-list.csv
+```{r load_data, find_data_major_and_statistic_major}
+major_list<-read_csv('https://raw.githubusercontent.com/fivethirtyeight/data/refs/heads/master/college-majors/majors-list.csv')
+major_list #view data frame
+```
+
+```{r}
+data_or_statistics_majors<-str_subset(major_list$Major, "DATA|STATISTICS")
+data_or_statistics_majors #View data for major in Data or Statistics 
+
+```
+*Based on the data frame on majors to pick to have economical success only contained one major in 'DATA' which is "COMPUTER PROGRAMMING AND DATA PROCESSING", or in 'STATISTICS' would be "MANAGEMENT INFORMATION SYSTEMS AND STATISTICS" and "STATISTICS AND DECISION SCIENCE". There are only 3 majors pertaining to statistics or data for a successful economical future. Yet there are so many engineer majors, but I mean we can't all be engineers. *
+
+
+
+***The two exercises below are taken from R for Data Science, 14.3.5.1 in the on-line version:***
+3. Describe, in words, what these expressions will match:
+
+(.)\1\1- Matches with a group of characters that have three repeating characters, ex "eee" and "111". For the purpose of R the function had to be used a a string "(.)\\1\\1".
+
+"(.)(.)\\2\\1"- Matches with a group of characters that have a pair characters matching in reverse, ex. "cbbc".
+
+(..)\1- After turning the function into a string "(..)\\1", the function was used to find groups of characters that have a pair of characters repeating one after another, ex.abab
+
+"(.).\\1.\\1"-Matches with a group of characters that have single character that repeats itself after another character three times, ex. "efere" from reference.
+
+"(.)(.)(.).*\\3\\2\\1"- Matches with a group of characters that have three characters that match in reverse but in between the pair of matching three characters, there will be zero or more of any characters, ex "abc27hnchcba".
+
+
+
+
+4.Construct regular expressions to match words that:
+Start and end with the same character.
+
+```{r}
+test<-c("111", "aaa", "abc", "abbc", "abba", "Eleven", "Church", "abab")
+str_view(test, regex("^(.)((.*\\1$)|\\1$)", ignore_case=TRUE))
+```
+
+
+Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+
+```{r}
+str_view(test, regex("([A-Za-z][A-Za-z]).*\\1", ignore_case=TRUE))
+```
+
+
+Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+
+```{r}
+str_view(test, regex("(.).\\1.\\1", ignore_case=TRUE))
+```
+
